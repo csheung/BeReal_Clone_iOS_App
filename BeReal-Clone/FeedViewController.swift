@@ -7,11 +7,18 @@
 
 import UIKit
 import ParseSwift
+import Alamofire
 
 class FeedViewController: UIViewController {
     
+    // connect the items in storyboard
     @IBOutlet weak var postPhotoButton: UIButton!
     @IBOutlet weak var tableView: UITableView!
+    
+    var request: Alamofire.Request?
+    
+    // create UIRefreshControl() Object
+    let refreshControl = UIRefreshControl()
     
     private var posts = [Post]() {
         didSet {
@@ -23,21 +30,53 @@ class FeedViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-        
+
         tableView.delegate = self
         tableView.dataSource = self
         tableView.allowsSelection = false
+        // add Subview for refresh control
+        tableView.addSubview(refreshControl)
+        refreshControl.addTarget(self, action: #selector(refreshFeed), for: .valueChanged)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        queryPosts { success in
+            if success {
+                print("Data fetched successfully!")
+            } else {
+                print("Failed to fetch data...")
+            }
+        }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        request?.cancel() // Cancel the Alamofire request
+    }
+    
+    @objc func refreshFeed() {
+        // Cancel any previous request if it exists
+        request?.cancel()
+        
+        // Fetch new data and update the UI here
+        // For example, you can call a function that fetches the latest posts from a server
+        queryPosts { [weak self] success in
+            DispatchQueue.main.async {
+                if success {
+                    // Reload the table view with the new data
+                    self?.tableView.reloadData()
+                }
 
-        queryPosts()
+                // Stop the refresh control
+                self?.refreshControl.endRefreshing()
+            }
+        }
     }
     
     /// Query Posts
     // https://github.com/parse-community/Parse-Swift/blob/3d4bb13acd7496a49b259e541928ad493219d363/ParseSwift.playground/Pages/2%20-%20Finding%20Objects.xcplaygroundpage/Contents.swift#L66
-    private func queryPosts() {
+    private func queryPosts(completion: @escaping (Bool) -> Void) {
         
         // 1. Create a query to fetch Posts
         // 2. Any properties that are Parse objects are stored by reference in Parse DB and as such need to explicitly use `include_:)` to be included in query results.
@@ -52,8 +91,12 @@ class FeedViewController: UIViewController {
             case .success(let posts):
                 // Update local posts property with fetched posts
                 self?.posts = posts
+                // Call completion handler with success value
+                completion(true)
             case .failure(let error):
                 self?.showAlert(description: error.localizedDescription)
+                // Call completion handler with failure value
+                completion(false)
             }
         }
     }

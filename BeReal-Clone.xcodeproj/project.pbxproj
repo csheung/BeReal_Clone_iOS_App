@@ -95,7 +95,6 @@
 		2727F57729CC20A20004118B /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				27D72B4629CBB30200AC4ACA /* Main.storyboard */,
 			);
 			name = Fonts;
 			sourceTree = "<group>";
@@ -127,10 +126,11 @@
 				2727F57429CC1FA70004118B /* Feed Table View */,
 				2727F57529CC1FAD0004118B /* Post */,
 				2727F57629CC1FB30004118B /* Extensions */,
-				2727F57729CC20A20004118B /* Fonts */,
+				27D72B4629CBB30200AC4ACA /* Main.storyboard */,
 				27D72B4929CBB30400AC4ACA /* Assets.xcassets */,
 				27D72B4B29CBB30400AC4ACA /* LaunchScreen.storyboard */,
 				27D72B4E29CBB30400AC4ACA /* Info.plist */,
+				2727F57729CC20A20004118B /* Fonts */,
 			);
 			path = "BeReal-Clone";
 			sourceTree = "<group>";

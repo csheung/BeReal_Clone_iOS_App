@@ -8,6 +8,7 @@
 import UIKit
 import PhotosUI
 import ParseSwift
+import CoreLocation
 
 class PostViewController: UIViewController {
     
@@ -20,6 +21,7 @@ class PostViewController: UIViewController {
     @IBOutlet weak var previewImageView: UIImageView!
     
     private var pickedImage: UIImage?
+    private var locationName: String?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -140,6 +142,8 @@ class PostViewController: UIViewController {
         // Set properties
         post.imageFile = imageFile
         post.caption = captionTextField.text
+        post.location = locationName
+        
 
         // Set the user as the current user
         post.user = User.current
@@ -181,6 +185,23 @@ class PostViewController: UIViewController {
         alertController.addAction(action)
         present(alertController, animated: true)
     }
+    
+    private func reverseGeocode(location: CLLocation, completion: @escaping (String?) -> Void) {
+        let geocoder = CLGeocoder()
+        
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if let error = error {
+                print("Reverse geocoding error: \(error.localizedDescription)")
+                completion(nil)
+            } else if let placemark = placemarks?.first {
+                let locationName = "\(placemark.name ?? ""), \(placemark.locality ?? ""), \(placemark.administrativeArea ?? ""), \(placemark.country ?? "")"
+                completion(locationName)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+    
 }
 
 /// Add PHPickerViewController delegate and handle picked image.
@@ -189,6 +210,29 @@ extension PostViewController: PHPickerViewControllerDelegate {
         // Dismiss the picker
         picker.dismiss(animated: true)
 
+        // Get the selected image asset
+        let result = results.first
+        
+        // Get image location
+        // PHAsset contains metadata about an image or video (ex. location, size, etc.)
+        guard let assetId = result?.assetIdentifier,
+              let location = PHAsset.fetchAssets(withLocalIdentifiers: [assetId], options: nil).firstObject?.location else {
+            return
+        }
+        // print to indicate the code works here for getting image coordinate...
+        print("📍 Image location coordinate: \(location.coordinate)")
+        
+        // get the location name using latitude and longitude from PHAsset
+        reverseGeocode(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude) { locationName in
+            if let locationName = locationName {
+                // Set locationName to use when saving post
+                self.locationName = locationName
+                print("Location name: \(locationName)")
+            } else {
+                print("Location name not available")
+            }
+        }
+        
         // Make sure we have a non-nil item provider
         guard let provider = results.first?.itemProvider,
            // Make sure the provider can load a UIImage
@@ -215,16 +259,54 @@ extension PostViewController: PHPickerViewControllerDelegate {
               // UI updates (like setting image on image view) should be done on main thread
               DispatchQueue.main.async { [weak self] in
 
-                 // Set image on preview image view
-                 self?.previewImageView.image = image
+                // Set image on preview image view
+                self?.previewImageView.image = image
 
-                 // Set image to use when saving post
-                 self?.pickedImage = image
+                // show the image on View Controller
+                self?.previewImageView.isHidden = false
+
+                // Set image to use when saving post
+                self?.pickedImage = image
                   
-                  // show the image on View Controller
-                  self?.previewImageView.isHidden = false
               }
            }
+        }
+    }
+    
+    func reverseGeocode(latitude: CLLocationDegrees, longitude: CLLocationDegrees, completion: @escaping (String?) -> Void) {
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+
+        geocoder.reverseGeocodeLocation(location) { placemarks, error in
+            if let error = error {
+                print("Reverse geocoding failed: \(error)")
+                completion(nil)
+                return
+            }
+
+            if let placemark = placemarks?.first {
+                var locationName = ""
+
+                if let name = placemark.name {
+                    locationName += name
+                }
+
+                if let locality = placemark.locality {
+                    locationName += ", \(locality)"
+                }
+
+                if let administrativeArea = placemark.administrativeArea {
+                    locationName += ", \(administrativeArea)"
+                }
+
+                if let country = placemark.country {
+                    locationName += ", \(country)"
+                }
+                
+                completion(locationName)
+            } else {
+                completion(nil)
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 
 Submitted by: **Chun Sheung Ng (Derrick)**
 
-**BeReal Clone** is an app that ... [TODO] 
+**BeReal Clone** is an app that clones the interface and functionality of the BeReal mobile application. It allows users to log in, sign up, create posts and browse feeds of all other posts.
 
 Time spent: **8** hours spent in total
 
@@ -17,9 +17,9 @@ The following **required** functionality is completed:
  
 The following **optional** features are implemented:
 
-- [ ] Users can pull to refresh their feed and see a loading indicator
+- [x] Users can pull to refresh their feed and see a loading indicator
 - [ ] Users can infinite-scroll in their feed to see past the 10 most recent photos
-- [ ] Users can see location and time of photo upload in the feed    
+- [x] Users can see location and time of photo upload in the feed    
 - [x] User is able to logout
 - [x] User stays logged in when app is closed and open again    
 
@@ -32,11 +32,10 @@ The following **additional** features are implemented:
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
+<!--BeReal-Clone-Demo.gif-->
+<img src="BeReal-Clone-Demo.gif" width="250" height="500"/>
+<!--<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />-->
 
-<img src='http://i.imgur.com/link/to/your/gif/file.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
-
-<!-- Replace this with whatever GIF tool you used! -->
-GIF created with ...  
 <!-- Recommended tools:
 [Kap](https://getkap.co/) for macOS
 [ScreenToGif](https://www.screentogif.com/) for Windows

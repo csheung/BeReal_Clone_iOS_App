@@ -7,6 +7,7 @@
 
 import Foundation
 import ParseSwift
+import CoreLocation
 
 
 /// Pt 1 - Create Post Parse Object model

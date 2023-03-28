@@ -18,6 +18,7 @@ class PostCell: UITableViewCell {
     @IBOutlet weak var captionLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     
+    var request: Alamofire.Request?
     private var imageDataRequest: DataRequest?
     
     func configure(with post: Post) {
@@ -30,9 +31,11 @@ class PostCell: UITableViewCell {
         // Image
         if let imageFile = post.imageFile,
            let imageUrl = imageFile.url {
+            self.request?.cancel() // Cancel the Alamofire request
             
             // Use AlamofireImage helper to fetch remote image from URL
             imageDataRequest = AF.request(imageUrl).responseImage { [weak self] response in
+                
                 switch response.result {
                 case .success(let image):
                     // Set image view image with fetched image
@@ -42,7 +45,11 @@ class PostCell: UITableViewCell {
                     break
                 }
             }
+            self.request?.resume()
         }
+        
+        // Location
+        locationLabel.text = post.location
 
         // Caption
         captionLabel.text = post.caption
